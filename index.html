@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paws & Claws Disco Dance-Off!</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Righteous&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --beat-speed: 0.5s;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #0f0722;
+            color: #ffffff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .title-font {
+            font-family: 'Righteous', cursive;
+        }
+
+        /* Disco Stage & Perspective Floor */
+        .stage-container {
+            position: relative;
+            background: radial-gradient(circle at 50% 30%, #2a1154 0%, #090314 75%);
+            overflow: hidden;
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.9);
+        }
+
+        .disco-floor {
+            position: absolute;
+            bottom: -35%;
+            left: -15%;
+            width: 130%;
+            height: 65%;
+            transform: perspective(350px) rotateX(65deg);
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 4px;
+            padding: 8px;
+            background: #05020a;
+            border-top: 4px solid #ff007f;
+            box-shadow: 0 -10px 40px rgba(255, 0, 127, 0.4);
+            z-index: 1;
+        }
+
+        .disco-tile {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            transition: background-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        /* Laser Beams */
+        .laser-beam {
+            position: absolute;
+            top: -20px;
+            width: 4px;
+            height: 140%;
+            transform-origin: top center;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 2;
+            filter: blur(1px);
+            transition: opacity 0.3s;
+        }
+
+        .lasers-active .laser-beam {
+            opacity: 0.65;
+        }
+
+        .laser-1 {
+            left: 20%;
+            background: linear-gradient(to bottom, #00f3ff, transparent);
+            animation: laserSweep1 calc(var(--beat-speed) * 4) ease-in-out infinite alternate;
+        }
+        .laser-2 {
+            left: 80%;
+            background: linear-gradient(to bottom, #ff007f, transparent);
+            animation: laserSweep2 calc(var(--beat-speed) * 4) ease-in-out infinite alternate;
+        }
+        .laser-3 {
+            left: 50%;
+            background: linear-gradient(to bottom, #ffe600, transparent);
+            animation: laserSweep3 calc(var(--beat-speed) * 3) ease-in-out infinite alternate;
+        }
+
+        @keyframes laserSweep1 {
+            0% { transform: rotate(-40deg); }
+            100% { transform: rotate(25deg); }
+        }
+        @keyframes laserSweep2 {
+            0% { transform: rotate(40deg); }
+            100% { transform: rotate(-25deg); }
+        }
+        @keyframes laserSweep3 {
+            0% { transform: rotate(-30deg); }
+            100% { transform: rotate(30deg); }
+        }
+
+        /* Disco Ball Animation */
+        .disco-ball-group {
+            animation: swingBall calc(var(--beat-speed) * 8) ease-in-out infinite alternate;
+            transform-origin: top center;
+        }
+        @keyframes swingBall {
+            0% { transform: rotate(-5deg); }
+            100% { transform: rotate(5deg); }
+        }
+
+        /* Character Transform Origins for Rigged SVG Parts */
+        .char-wrapper {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 10;
+            cursor: pointer;
+        }
+        .char-wrapper:hover {
+            filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.4));
+        }
+
+        /* Lion SVG Pivot Points */
+        .lion-head-group { transform-origin: 100px 105px; }
+        .lion-torso-group { transform-origin: 100px 175px; }
+        .lion-arm-l { transform-origin: 65px 140px; }
+        .lion-arm-r { transform-origin: 135px 140px; }
+        .lion-leg-l { transform-origin: 82px 205px; }
+        .lion-leg-r { transform-origin: 118px 205px; }
+        .lion-tail { transform-origin: 120px 195px; }
+
+        /* Dog SVG Pivot Points */
+        .dog-head-group { transform-origin: 100px 125px; }
+        .dog-torso-group { transform-origin: 100px 180px; }
+        .dog-arm-l { transform-origin: 72px 150px; }
+        .dog-arm-r { transform-origin: 128px 150px; }
+        .dog-leg-l { transform-origin: 85px 205px; }
+        .dog-leg-r { transform-origin: 115px 205px; }
+        .dog-tail { transform-origin: 125px 190px; }
+        .dog-ear-l { transform-origin: 68px 95px; }
+        .dog-ear-r { transform-origin: 132px 95px; }
+
+        /* ==========================================
+           DANCE MOVE 1: DISCO BOOGIE
+           ========================================== */
+        .move-disco .char-svg {
+            animation: discoBounce var(--beat-speed) ease-in-out infinite alternate;
+        }
+        .move-disco .lion-head-group, .move-disco .dog-head-group {
+            animation: headBob var(--beat-speed) ease-in-out infinite alternate;
+        }
+        .move-disco .lion-arm-r, .move-disco .dog-arm-r {
+            animation: discoPointRight calc(var(--beat-speed) * 2) ease-in-out infinite alternate;
+        }
+        .move-disco .lion-arm-l, .move-disco .dog-arm-l {
+            animation: discoHipLeft var(--beat-speed) ease-in-out infinite alternate;
+        }
+        .move-disco .lion-leg-l, .move-disco .dog-leg-l {
+            animation: legTapLeft var(--beat-speed) ease-in-out infinite alternate;
+        }
+        .move-disco .lion-tail, .move-disco .dog-tail {
+            animation: tailWag calc(var(--beat-speed) * 0.5) ease-in-out infinite alternate;
+        }
+
+        @keyframes discoBounce {
+            0% { transform: translateY(0) scaleY(1); }
+            100% { transform: translateY(-16px) scaleY(1.03); }
+        }
+        @keyframes headBob {
+            0% { transform: rotate(-8deg) translateY(2px); }
+            100% { transform: rotate(8deg) translateY(-4px); }
+        }
+        @keyframes discoPointRight {
+            0% { transform: rotate(25deg); }
+            100% { transform: rotate(-135deg); }
+        }
+        @keyframes discoHipLeft {
+            0% { transform: rotate(15deg); }
+            100% { transform: rotate(45deg); }
+        }
+        @keyframes legTapLeft {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(18deg) translateY(-5px); }
+        }
+        @keyframes tailWag {
+            0% { transform: rotate(-20deg); }
+            100% { transform: rotate(25deg); }
+        }
+
+        /* ==========================================
+           DANCE MOVE 2: BOOTY FLOSS / WIGGLE
+           ========================================== */
+        .move-floss .char-svg {
+            animation: flossSway var(--beat-speed) ease-in-out infinite alternate;
+        }
+        .move-floss .lion-torso-group, .move-floss .dog-torso-group {
+            animation: hipShaker calc(var(--beat-speed) * 0.5) ease-in-out infinite alternate;
+        }
+        .move-floss .lion-head-group, .move-floss .dog-head-group {
+            animation: headCounter calc(var(--beat-speed) * 0.5) ease-in-out infinite alternate;
+        }
+        .move-floss .lion-arm-l, .move-floss .lion-arm-r,
+        .move-floss .dog-arm-l, .move-floss .dog-arm-r {
+            animation: flossArms calc(var(--beat-speed) * 0.5) linear infinite alternate;
+        }
+        .move-floss .lion-tail, .move-floss .dog-tail {
+            animation: tailWag calc(var(--beat-speed) * 0.25) linear infinite alternate;
+        }
+
+        @keyframes flossSway {
+            0% { transform: translateX(-10px); }
+            100% { transform: translateX(10px); }
+        }
+        @keyframes hipShaker {
+            0% { transform: translateX(-12px) rotate(-8deg); }
+            100% { transform: translateX(12px) rotate(8deg); }
+        }
+        @keyframes headCounter {
+            0% { transform: translateX(8px) rotate(10deg); }
+            100% { transform: translateX(-8px) rotate(-10deg); }
+        }
+        @keyframes flossArms {
+            0% { transform: rotate(-55deg); }
+            100% { transform: rotate(55deg); }
+        }
+
+        /* ==========================================
+           DANCE MOVE 3: HEADSPIN BREAKDANCE
+           ========================================== */
+        .move-breakdance .char-svg {
+            animation: headSpin calc(var(--beat-speed) * 2.5) linear infinite;
+            transform-origin: 100px 135px;
+        }
+        .move-breakdance .lion-leg-l, .move-breakdance .dog-leg-l {
+            animation: breakLegL calc(var(--beat-speed) * 0.5) ease-in-out infinite alternate;
+        }
+        .move-breakdance .lion-leg-r, .move-breakdance .dog-leg-r {
+            animation: breakLegR calc(var(--beat-speed) * 0.5) ease-in-out infinite alternate;
+        }
+        .move-breakdance .lion-arm-l, .move-breakdance .dog-arm-l {
+            transform: rotate(-70deg);
+        }
+        .move-breakdance .lion-arm-r, .move-breakdance .dog-arm-r {
+            transform: rotate(70deg);
+        }
+
+        @keyframes headSpin {
+            0% { transform: translateY(-15px) rotate(165deg) scaleX(1); }
+            50% { transform: translateY(-25px) rotate(180deg) scaleX(-1); }
+            100% { transform: translateY(-15px) rotate(195deg) scaleX(1); }
+        }
+        @keyframes breakLegL {
+            0% { transform: rotate(-45deg); }
+            100% { transform: rotate(25deg); }
+        }
+        @keyframes breakLegR {
+            0% { transform: rotate(45deg); }
+            100% { transform: rotate(-25deg); }
+        }
+
+        /* ==========================================
+           DANCE MOVE 4: THE ROBO-BORK
+           ========================================== */
+        .move-robot .char-svg {
+            animation: robotJerk calc(var(--beat-speed) * 2) steps(4, end) infinite;
+        }
+        .move-robot .lion-head-group, .move-robot .dog-head-group {
+            animation: robotHead calc(var(--beat-speed) * 2) steps(2, end) infinite alternate;
+        }
+        .move-robot .lion-arm-l, .move-robot .dog-arm-l {
+            animation: robotArmL var(--beat-speed) steps(3, end) infinite alternate;
+        }
+        .move-robot .lion-arm-r, .move-robot .dog-arm-r {
+            animation: robotArmR var(--beat-speed) steps(3, end) infinite alternate;
+        }
+
+        @keyframes robotJerk {
+            0% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(3deg); }
+            50% { transform: translateY(0) rotate(-3deg); }
+            75% { transform: translateY(-4px) rotate(0deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        @keyframes robotHead {
+            0% { transform: rotate(-15deg); }
+            100% { transform: rotate(15deg); }
+        }
+        @keyframes robotArmL {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(90deg); }
+        }
+        @keyframes robotArmR {
+            0% { transform: rotate(-90deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        /* ==========================================
+           DANCE MOVE 5: CONGA TORNADO
+           ========================================== */
+        .move-tornado .char-svg {
+            animation: tornadoSpin calc(var(--beat-speed) * 1.2) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        .move-tornado .lion-arm-l, .move-tornado .dog-arm-l {
+            transform: rotate(110deg);
+        }
+        .move-tornado .lion-arm-r, .move-tornado .dog-arm-r {
+            transform: rotate(-110deg);
+        }
+        .move-tornado .dog-ear-l {
+            animation: earFlapL calc(var(--beat-speed) * 0.4) infinite alternate;
+        }
+        .move-tornado .dog-ear-r {
+            animation: earFlapR calc(var(--beat-speed) * 0.4) infinite alternate;
+        }
+
+        @keyframes tornadoSpin {
+            0% { transform: translateY(0) scaleX(1); }
+            25% { transform: translateY(-30px) scaleX(0.1); }
+            50% { transform: translateY(-40px) scaleX(-1); }
+            75% { transform: translateY(-20px) scaleX(0.1); }
+            100% { transform: translateY(0) scaleX(1); }
+        }
+        @keyframes earFlapL {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(45deg); }
+        }
+        @keyframes earFlapR {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-45deg); }
+        }
+
+        /* ==========================================
+           DANCE MOVE 6: synchronized BALLET LEAP
+           ========================================== */
+        .move-ballet .char-svg {
+            animation: balletGrace calc(var(--beat-speed) * 2) ease-in-out infinite alternate;
+        }
+        .move-ballet .lion-arm-l, .move-ballet .dog-arm-l {
+            animation: balletArmL calc(var(--beat-speed) * 2) ease-in-out infinite alternate;
+        }
+        .move-ballet .lion-arm-r, .move-ballet .dog-arm-r {
+            animation: balletArmR calc(var(--beat-speed) * 2) ease-in-out infinite alternate;
+        }
+        .move-ballet .lion-leg-l, .move-ballet .dog-leg-l {
+            animation: balletLegL calc(var(--beat-speed) * 2) ease-in-out infinite alternate;
+        }
+        .move-ballet .lion-leg-r, .move-ballet .dog-leg-r {
+            animation: balletLegR calc(var(--beat-speed) * 2) ease-in-out infinite alternate;
+        }
+
+        @keyframes balletGrace {
+            0% { transform: translateY(0) rotate(-6deg); }
+            100% { transform: translateY(-45px) rotate(8deg); }
+        }
+        @keyframes balletArmL {
+            0% { transform: rotate(30deg); }
+            100% { transform: rotate(145deg); }
+        }
+        @keyframes balletArmR {
+            0% { transform: rotate(-30deg); }
+            100% { transform: rotate(-145deg); }
+        }
+        @keyframes balletLegL {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(55deg); }
+        }
+        @keyframes balletLegR {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-35deg); }
+        }
+
+        /* Floating Particles & Speech Bubbles */
+        .floating-particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 30;
+            animation: floatUp 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 1; }
+            60% { opacity: 1; }
+            100% { transform: translateY(-140px) scale(1.4) rotate(25deg); opacity: 0; }
+        }
+
+        .speech-bubble {
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background: #ffffff;
+            color: #1a0b36;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            border: 3px solid #ff007f;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 40;
+            pointer-events: none;
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -9px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 9px 7px 0;
+            border-style: solid;
+            border-color: #ff007f transparent;
+        }
+        .speech-bubble.show {
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* Visualizer Bars */
+        .eq-bar {
+            transition: height 0.08s ease;
+        }
+
+        /* Custom Button Active Glow */
+        .dance-btn.active {
+            background: linear-gradient(135deg, #ff007f, #7928ca);
+            border-color: #ffe600;
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.7);
+            transform: translateY(-2px);
+        }
+
+        /* Rainbow Strobe Mode */
+        .party-overdrive {
+            animation: overdriveBg 0.6s infinite alternate;
+        }
+        @keyframes overdriveBg {
+            0% { filter: hue-rotate(0deg) saturate(1.2); }
+            100% { filter: hue-rotate(90deg) saturate(1.8); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-2 sm:p-4 md:p-6">
+
+    <!-- Top Header & Hype Meter -->
+    <header class="max-w-5xl w-full mx-auto flex flex-col md:flex-row items-center justify-between gap-3 bg-indigo-950/70 backdrop-blur-md border border-pink-500/30 rounded-2xl p-3 sm:px-6 shadow-xl z-20">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-pink-500 to-yellow-400 flex items-center justify-center shadow-lg animate-bounce">
+                <i class="fa-solid fa-compact-disc text-2xl text-indigo-950"></i>
+            </div>
+            <div>
+                <h1 class="title-font text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-yellow-300 via-pink-400 to-cyan-300 bg-clip-text text-transparent tracking-wide">
+                    PAWS & CLAWS DISCO!
+                </h1>
+                <p class="text-xs text-purple-200">Barnaby the Pug & Leo the Lion's Unlikely Dance-Off</p>
+            </div>
+        </div>
+
+        <!-- Hype Meter & Score -->
+        <div class="w-full md:w-72 flex flex-col gap-1">
+            <div class="flex justify-between items-center text-xs font-bold">
+                <span class="text-yellow-300 flex items-center gap-1">
+                    <i class="fa-solid fa-fire text-orange-400"></i> GROOVE HYPE METER
+                </span>
+                <span id="hypeText" class="text-pink-400">75% BOOGIE</span>
+            </div>
+            <div class="w-full h-4 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-purple-500/40">
+                <div id="hypeBar" class="h-full bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400 rounded-full transition-all duration-300" style="width: 75%"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Interactive Stage -->
+    <main class="max-w-5xl w-full mx-auto my-3 flex-grow flex flex-col">
+        <div id="stageContainer" class="stage-container lasers-active w-full flex-grow min-h-[370px] sm:min-h-[430px] rounded-3xl border-2 border-purple-500/40 flex flex-col justify-between items-center relative select-none">
+
+            <!-- Lasers -->
+            <div class="laser-beam laser-1"></div>
+            <div class="laser-beam laser-2"></div>
+            <div class="laser-beam laser-3"></div>
+
+            <!-- Hanging Disco Ball & Status Pill -->
+            <div class="w-full flex justify-between items-start px-4 pt-2 z-20 pointer-events-none">
+                <!-- Live Beat Visualizer -->
+                <div class="bg-black/40 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10 flex items-end gap-1 h-12">
+                    <div class="eq-bar w-1.5 bg-cyan-400 rounded-t h-3"></div>
+                    <div class="eq-bar w-1.5 bg-pink-500 rounded-t h-6"></div>
+                    <div class="eq-bar w-1.5 bg-yellow-400 rounded-t h-8"></div>
+                    <div class="eq-bar w-1.5 bg-purple-400 rounded-t h-4"></div>
+                    <div class="eq-bar w-1.5 bg-green-400 rounded-t h-7"></div>
+                    <div class="eq-bar w-1.5 bg-pink-400 rounded-t h-3"></div>
+                </div>
+
+                <!-- Animated SVG Disco Ball -->
+                <div class="disco-ball-group flex flex-col items-center -mt-2 pointer-events-auto cursor-pointer" id="discoBallBtn" title="Click to toggle Strobe Mode!">
+                    <div class="w-1 h-8 bg-slate-400"></div>
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-slate-400 via-white to-cyan-200 shadow-[0_0_35px_rgba(255,255,255,0.9)] flex items-center justify-center relative overflow-hidden border-2 border-white">
+                        <!-- Grid lines on disco ball -->
+                        <div class="absolute inset-0 grid grid-cols-4 grid-rows-4 gap-0.5 opacity-60">
+                            <div class="bg-slate-700"></div><div class="bg-white"></div><div class="bg-slate-500"></div><div class="bg-cyan-300"></div>
+                            <div class="bg-pink-300"></div><div class="bg-slate-600"></div><div class="bg-white"></div><div class="bg-slate-700"></div>
+                            <div class="bg-slate-500"></div><div class="bg-yellow-200"></div><div class="bg-slate-700"></div><div class="bg-white"></div>
+                            <div class="bg-white"></div><div class="bg-slate-500"></div><div class="bg-pink-200"></div><div class="bg-slate-600"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Move Badge -->
+                <div class="bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10 text-right">
+                    <span class="text-[10px] uppercase tracking-wider text-purple-300 block">Current Move</span>
+                    <span id="currentMoveLabel" class="text-xs sm:text-sm font-bold text-yellow-300">🕺 Disco Boogie</span>
+                </div>
+            </div>
+
+            <!-- DANCERS CONTAINER -->
+            <div id="dancersArena" class="move-disco relative z-20 flex items-end justify-center gap-4 sm:gap-12 md:gap-20 w-full px-4 pb-8 sm:pb-10 mt-auto">
+
+                <!-- ==========================
+                     LION CHARACTER (LEO)
+                     ========================== -->
+                <div id="lionCharacter" class="char-wrapper relative flex flex-col items-center group" title="Click Leo for a Disco Roar!">
+                    <div id="lionSpeech" class="speech-bubble">ROAR-SOME MOVES! 🦁</div>
+                    
+                    <svg class="char-svg w-40 h-48 sm:w-52 sm:h-60 md:w-60 md:h-68 overflow-visible" viewBox="0 0 200 250">
+                        <!-- Shadow -->
+                        <ellipse cx="100" cy="235" rx="52" ry="10" fill="rgba(0,0,0,0.45)" />
+
+                        <!-- Tail -->
+                        <g class="lion-tail">
+                            <path d="M 115 195 Q 165 185 170 145" fill="none" stroke="#f59e0b" stroke-width="8" stroke-linecap="round"/>
+                            <circle cx="172" cy="142" r="11" fill="#78350f"/>
+                        </g>
+
+                        <!-- Left Leg -->
+                        <g class="lion-leg-l">
+                            <rect x="70" y="195" width="22" height="36" rx="10" fill="#d97706"/>
+                            <ellipse cx="81" cy="230" rx="14" ry="8" fill="#fbbf24"/>
+                        </g>
+
+                        <!-- Right Leg -->
+                        <g class="lion-leg-r">
+                            <rect x="108" y="195" width="22" height="36" rx="10" fill="#d97706"/>
+                            <ellipse cx="119" cy="230" rx="14" ry="8" fill="#fbbf24"/>
+                        </g>
+
+                        <!-- Torso & Disco Jacket -->
+                        <g class="lion-torso-group">
+                            <!-- Body -->
+                            <rect x="65" y="130" width="70" height="75" rx="30" fill="#f59e0b"/>
+                            <!-- Belly -->
+                            <ellipse cx="100" cy="168" rx="22" ry="26" fill="#fde68a"/>
+                            <!-- Funky Gold Chain -->
+                            <path d="M 78 138 Q 100 165 122 138" fill="none" stroke="#fef08a" stroke-width="5" stroke-dasharray="6,3"/>
+                            <circle cx="100" cy="158" r="7" fill="#eab308" stroke="#fef08a" stroke-width="2"/>
+                            <!-- Pink Tutu (Toggleable Prop) -->
+                            <g class="prop-tutu hidden">
+                                <path d="M 52 192 Q 100 208 148 192 L 158 210 Q 100 225 42 210 Z" fill="#ec4899" opacity="0.9" stroke="#fbcfe8" stroke-width="2"/>
+                            </g>
+
+                            <!-- Left Arm -->
+                            <g class="lion-arm-l">
+                                <rect x="44" y="132" width="22" height="48" rx="11" fill="#f59e0b"/>
+                                <circle cx="55" cy="180" r="11" fill="#fde68a"/>
+                            </g>
+
+                            <!-- Right Arm -->
+                            <g class="lion-arm-r">
+                                <rect x="134" y="132" width="22" height="48" rx="11" fill="#f59e0b"/>
+                                <circle cx="145" cy="180" r="11" fill="#fde68a"/>
+                            </g>
+                        </g>
+
+                        <!-- Lion Head & Fluffy Mane -->
+                        <g class="lion-head-group">
+                            <!-- Scalloped Mane -->
+                            <circle cx="100" cy="95" r="54" fill="#92400e"/>
+                            <circle cx="60" cy="65" r="18" fill="#78350f"/>
+                            <circle cx="140" cy="65" r="18" fill="#78350f"/>
+                            <circle cx="48" cy="98" r="18" fill="#92400e"/>
+                            <circle cx="152" cy="98" r="18" fill="#92400e"/>
+                            <circle cx="62" cy="128" r="18" fill="#78350f"/>
+                            <circle cx="138" cy="128" r="18" fill="#78350f"/>
+                            <circle cx="100" cy="48" r="18" fill="#92400e"/>
+
+                            <!-- Rainbow Afro Prop (Hidden by default) -->
+                            <g class="prop-afro hidden">
+                                <circle cx="100" cy="48" r="35" fill="#ec4899"/>
+                                <circle cx="68" cy="58" r="26" fill="#3b82f6"/>
+                                <circle cx="132" cy="58" r="26" fill="#eab308"/>
+                                <circle cx="85" cy="36" r="24" fill="#10b981"/>
+                                <circle cx="115" cy="36" r="24" fill="#a855f7"/>
+                            </g>
+
+                            <!-- Ears -->
+                            <circle cx="65" cy="60" r="12" fill="#f59e0b"/>
+                            <circle cx="65" cy="60" r="6" fill="#fde68a"/>
+                            <circle cx="135" cy="60" r="12" fill="#f59e0b"/>
+                            <circle cx="135" cy="60" r="6" fill="#fde68a"/>
+
+                            <!-- Face -->
+                            <circle cx="100" cy="96" r="38" fill="#fbbf24"/>
+
+                            <!-- Muzzle -->
+                            <ellipse cx="91" cy="108" rx="13" ry="10" fill="#fef3c7"/>
+                            <ellipse cx="109" cy="108" rx="13" ry="10" fill="#fef3c7"/>
+                            <!-- Open Happy Mouth -->
+                            <path d="M 88 113 Q 100 128 112 113 Z" fill="#991b1b"/>
+                            <path d="M 94 118 Q 100 125 106 118 Z" fill="#f43f5e"/>
+
+                            <!-- Nose -->
+                            <polygon points="92,98 108,98 100,107" fill="#451a03"/>
+
+                            <!-- Whiskers -->
+                            <line x1="65" y1="104" x2="82" y2="106" stroke="#78350f" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="65" y1="112" x2="82" y2="110" stroke="#78350f" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="135" y1="104" x2="118" y2="106" stroke="#78350f" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="135" y1="112" x2="118" y2="110" stroke="#78350f" stroke-width="2" stroke-linecap="round"/>
+
+                            <!-- Eyes -->
+                            <circle cx="84" cy="84" r="6.5" fill="#1e1b4b"/>
+                            <circle cx="82" cy="82" r="2.5" fill="#ffffff"/>
+                            <circle cx="116" cy="84" r="6.5" fill="#1e1b4b"/>
+                            <circle cx="114" cy="82" r="2.5" fill="#ffffff"/>
+
+                            <!-- Funky Star Shades Prop (Visible by default!) -->
+                            <g class="prop-shades">
+                                <polygon points="82,66 86,76 97,76 88,83 92,93 82,87 72,93 76,83 67,76 78,76" fill="#ec4899" stroke="#fef08a" stroke-width="2.5"/>
+                                <polygon points="118,66 122,76 133,76 124,83 128,93 118,87 108,93 112,83 103,76 114,76" fill="#ec4899" stroke="#fef08a" stroke-width="2.5"/>
+                                <line x1="94" y1="80" x2="106" y2="80" stroke="#fef08a" stroke-width="3"/>
+                            </g>
+
+                            <!-- Crown Prop -->
+                            <g class="prop-crown hidden">
+                                <polygon points="75,55 82,32 100,45 118,32 125,55" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+                                <circle cx="100" cy="48" r="3" fill="#ef4444"/>
+                            </g>
+                        </g>
+                    </svg>
+                    <span class="mt-1 px-3 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200 text-xs font-bold">
+                        🦁 Leo "King of Funk"
+                    </span>
+                </div>
+
+                <!-- ==========================
+                     DOG CHARACTER (BARNABY THE PUG)
+                     ========================== -->
+                <div id="dogCharacter" class="char-wrapper relative flex flex-col items-center group" title="Click Barnaby for a Bork!">
+                    <div id="dogSpeech" class="speech-bubble">BORK YEAH! 🐾</div>
+
+                    <svg class="char-svg w-36 h-44 sm:w-48 sm:h-56 md:w-56 md:h-64 overflow-visible" viewBox="0 0 200 250">
+                        <!-- Shadow -->
+                        <ellipse cx="100" cy="235" rx="46" ry="9" fill="rgba(0,0,0,0.45)" />
+
+                        <!-- Curly Pug Tail -->
+                        <g class="dog-tail">
+                            <path d="M 122 188 C 155 185 155 150 132 160 C 122 165 135 178 140 170" fill="none" stroke="#d6d3d1" stroke-width="9" stroke-linecap="round"/>
+                        </g>
+
+                        <!-- Left Leg -->
+                        <g class="dog-leg-l">
+                            <rect x="74" y="195" width="18" height="35" rx="9" fill="#a8a29e"/>
+                            <ellipse cx="83" cy="230" rx="12" ry="7" fill="#57534e"/>
+                        </g>
+
+                        <!-- Right Leg -->
+                        <g class="dog-leg-r">
+                            <rect x="108" y="195" width="18" height="35" rx="9" fill="#a8a29e"/>
+                            <ellipse cx="117" cy="230" rx="12" ry="7" fill="#57534e"/>
+                        </g>
+
+                        <!-- Dog Torso -->
+                        <g class="dog-torso-group">
+                            <!-- Chubby Pug Body -->
+                            <rect x="68" y="140" width="64" height="65" rx="28" fill="#e7e5e4"/>
+                            <!-- Cute Spot -->
+                            <circle cx="115" cy="175" r="12" fill="#a8a29e" opacity="0.6"/>
+                            <!-- Red Bowtie -->
+                            <polygon points="100,146 84,138 84,154" fill="#ef4444"/>
+                            <polygon points="100,146 116,138 116,154" fill="#ef4444"/>
+                            <circle cx="100" cy="146" r="5" fill="#b91c1c"/>
+
+                            <!-- Pink Tutu Prop -->
+                            <g class="prop-tutu hidden">
+                                <path d="M 55 190 Q 100 205 145 190 L 154 208 Q 100 220 46 208 Z" fill="#06b6d4" opacity="0.9" stroke="#cffafe" stroke-width="2"/>
+                            </g>
+
+                            <!-- Left Arm -->
+                            <g class="dog-arm-l">
+                                <rect x="52" y="144" width="18" height="42" rx="9" fill="#d6d3d1"/>
+                                <circle cx="61" cy="186" r="9" fill="#57534e"/>
+                            </g>
+
+                            <!-- Right Arm -->
+                            <g class="dog-arm-r">
+                                <rect x="130" y="144" width="18" height="42" rx="9" fill="#d6d3d1"/>
+                                <circle cx="139" cy="186" r="9" fill="#57534e"/>
+                            </g>
+                        </g>
+
+                        <!-- Dog Head -->
+                        <g class="dog-head-group">
+                            <!-- Rainbow Afro Prop -->
+                            <g class="prop-afro hidden">
+                                <circle cx="100" cy="70" r="32" fill="#eab308"/>
+                                <circle cx="72" cy="80" r="24" fill="#ec4899"/>
+                                <circle cx="128" cy="80" r="24" fill="#06b6d4"/>
+                                <circle cx="100" cy="58" r="25" fill="#a855f7"/>
+                            </g>
+
+                            <!-- Floppy Left Ear -->
+                            <g class="dog-ear-l">
+                                <path d="M 72 82 C 45 80 42 115 62 118 C 72 118 75 95 72 82 Z" fill="#44403c"/>
+                            </g>
+
+                            <!-- Floppy Right Ear -->
+                            <g class="dog-ear-r">
+                                <path d="M 128 82 C 155 80 158 115 138 118 C 128 118 125 95 128 82 Z" fill="#44403c"/>
+                            </g>
+
+                            <!-- Head Base -->
+                            <rect x="64" y="75" width="72" height="64" rx="32" fill="#e7e5e4"/>
+
+                            <!-- Forehead Wrinkles -->
+                            <path d="M 88 85 Q 100 90 112 85" fill="none" stroke="#a8a29e" stroke-width="2.5" stroke-linecap="round"/>
+                            <path d="M 92 90 Q 100 94 108 90" fill="none" stroke="#a8a29e" stroke-width="2" stroke-linecap="round"/>
+
+                            <!-- Dark Pug Mask & Muzzle -->
+                            <ellipse cx="100" cy="116" rx="22" ry="16" fill="#44403c"/>
+
+                            <!-- Derpy Pink Tongue Sticking Out -->
+                            <path d="M 95 122 C 95 142 112 142 110 122 Z" fill="#fb7185" stroke="#e11d48" stroke-width="1.5"/>
+                            <line x1="103" y1="124" x2="103" y2="134" stroke="#e11d48" stroke-width="1.5"/>
+
+                            <!-- Cute Nose -->
+                            <ellipse cx="100" cy="110" rx="8" ry="5.5" fill="#1c1917"/>
+
+                            <!-- Big Googly Pug Eyes -->
+                            <circle cx="80" cy="102" r="10" fill="#ffffff" stroke="#44403c" stroke-width="2"/>
+                            <circle cx="78" cy="102" r="5.5" fill="#1c1917"/>
+                            <circle cx="76" cy="99" r="2" fill="#ffffff"/>
+
+                            <circle cx="120" cy="102" r="10" fill="#ffffff" stroke="#44403c" stroke-width="2"/>
+                            <circle cx="122" cy="102" r="5.5" fill="#1c1917"/>
+                            <circle cx="120" cy="99" r="2" fill="#ffffff"/>
+
+                            <!-- Cool Deal-With-It Visor Shades Prop -->
+                            <g class="prop-shades">
+                                <rect x="64" y="92" width="32" height="16" rx="4" fill="#06b6d4" stroke="#ffffff" stroke-width="2"/>
+                                <rect x="104" y="92" width="32" height="16" rx="4" fill="#06b6d4" stroke="#ffffff" stroke-width="2"/>
+                                <line x1="96" y1="98" x2="104" y2="98" stroke="#ffffff" stroke-width="3"/>
+                            </g>
+
+                            <!-- Crown Prop -->
+                            <g class="prop-crown hidden">
+                                <polygon points="78,77 85,56 100,68 115,56 122,77" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+                                <circle cx="100" cy="70" r="3" fill="#3b82f6"/>
+                            </g>
+                        </g>
+                    </svg>
+                    <span class="mt-1 px-3 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-200 text-xs font-bold">
+                        🐶 Barnaby "Sir Borks-a-Lot"
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- 3D Perspective Disco Floor -->
+            <div id="discoFloor" class="disco-floor">
+                <!-- 40 Tiles populated via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom DJ Control Deck -->
+    <footer class="max-w-5xl w-full mx-auto bg-indigo-950/85 backdrop-blur-xl border border-purple-500/40 rounded-3xl p-3 sm:p-5 shadow-2xl z-20">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+
+            <!-- Left Column: Dance Move Selector (6 buttons) -->
+            <div class="lg:col-span-6 flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-pink-300">
+                        <i class="fa-solid fa-bolt mr-1"></i> 1. Pick Their Dance Move
+                    </span>
+                    <span class="text-[11px] text-purple-300">Tap characters for reactions!</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <button data-move="move-disco" data-label="🕺 Disco Boogie" class="dance-btn active flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-indigo-900/80 hover:bg-indigo-800 border border-purple-400/30 text-xs sm:text-sm font-bold transition-all">
+                        <span>🕺</span> Disco Fever
+                    </button>
+                    <button data-move="move-floss" data-label="🍑 Booty Wiggle" class="dance-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-indigo-900/80 hover:bg-indigo-800 border border-purple-400/30 text-xs sm:text-sm font-bold transition-all">
+                        <span>🍑</span> Booty Floss
+                    </button>
+                    <button data-move="move-breakdance" data-label="🤸 Headspin Mania" class="dance-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-indigo-900/80 hover:bg-indigo-800 border border-purple-400/30 text-xs sm:text-sm font-bold transition-all">
+                        <span>🤸</span> Headspin
+                    </button>
+                    <button data-move="move-robot" data-label="🤖 The Robo-Bork" class="dance-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-indigo-900/80 hover:bg-indigo-800 border border-purple-400/30 text-xs sm:text-sm font-bold transition-all">
+                        <span>🤖</span> Robo-Bork
+                    </button>
+                    <button data-move="move-tornado" data-label="🌪️ Zoomie Tornado" class="dance-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-indigo-900/80 hover:bg-indigo-800 border border-purple-400/30 text-xs sm:text-sm font-bold transition-all">
+                        <span>🌪️</span> Tornado Spin
+                    </button>
+                    <button data-move="move-ballet" data-label="🩰 Swan Lake Leap" class="dance-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-indigo-900/80 hover:bg-indigo-800 border border-purple-400/30 text-xs sm:text-sm font-bold transition-all">
+                        <span>🩰</span> Swan Ballet
+                    </button>
+                </div>
+            </div>
+
+            <!-- Middle Column: Music Beat & Tempo Controls -->
+            <div class="lg:col-span-3 flex flex-col gap-2 bg-slate-900/70 p-3 rounded-2xl border border-white/10">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-cyan-300">
+                        <i class="fa-solid fa-music mr-1"></i> 2. DJ Synth Beat
+                    </span>
+                    <span id="bpmDisplay" class="text-xs font-bold text-yellow-300">120 BPM</span>
+                </div>
+
+                <!-- Play/Stop Music Button -->
+                <button id="musicToggleBtn" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95">
+                    <i id="musicIcon" class="fa-solid fa-play"></i>
+                    <span id="musicBtnText">START DISCO BEAT</span>
+                </button>
+
+                <!-- Tempo Slider -->
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="text-xs text-purple-300">🐢</span>
+                    <input id="bpmSlider" type="range" min="70" max="200" value="120" class="w-full accent-pink-500 cursor-pointer h-2 bg-indigo-950 rounded-lg">
+                    <span class="text-xs text-purple-300">⚡</span>
+                </div>
+            </div>
+
+            <!-- Right Column: Funny Soundboard & Dress-Up Props -->
+            <div class="lg:col-span-3 flex flex-col gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-yellow-300">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 3. Props & FX
+                </span>
+
+                <!-- Sound FX Row -->
+                <div class="grid grid-cols-3 gap-1.5">
+                    <button id="sfxBarkBtn" class="py-2 px-2 rounded-xl bg-pink-600/80 hover:bg-pink-500 border border-pink-400/40 text-xs font-bold flex flex-col items-center transition active:scale-90">
+                        <span class="text-base">🐶</span> Bork!
+                    </button>
+                    <button id="sfxRoarBtn" class="py-2 px-2 rounded-xl bg-amber-600/80 hover:bg-amber-500 border border-amber-400/40 text-xs font-bold flex flex-col items-center transition active:scale-90">
+                        <span class="text-base">🦁</span> Roar!
+                    </button>
+                    <button id="sfxHornBtn" class="py-2 px-2 rounded-xl bg-cyan-600/80 hover:bg-cyan-500 border border-cyan-400/40 text-xs font-bold flex flex-col items-center transition active:scale-90">
+                        <span class="text-base">📢</span> Airhorn
+                    </button>
+                </div>
+
+                <!-- Costume & Treat Drop Row -->
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button id="costumeBtn" class="py-2 px-2.5 rounded-xl bg-purple-700/80 hover:bg-purple-600 border border-purple-400/40 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95">
+                        <i class="fa-solid fa-glasses text-yellow-300"></i> Swap Outfit
+                    </button>
+                    <button id="treatRainBtn" class="py-2 px-2.5 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-slate-950 text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-md transition active:scale-95">
+                        <span>🦴</span> Treat Rain!
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- Complete Interactive JavaScript & Web Audio Synthesizer -->
+    <script>
+        /**************************************************************
+         * 1. STATE & DOM ELEMENTS
+         **************************************************************/
+        const stageContainer = document.getElementById('stageContainer');
+        const dancersArena = document.getElementById('dancersArena');
+        const discoFloor = document.getElementById('discoFloor');
+        const currentMoveLabel = document.getElementById('currentMoveLabel');
+        const bpmSlider = document.getElementById('bpmSlider');
+        const bpmDisplay = document.getElementById('bpmDisplay');
+        const musicToggleBtn = document.getElementById('musicToggleBtn');
+        const musicIcon = document.getElementById('musicIcon');
+        const musicBtnText = document.getElementById('musicBtnText');
+        const hypeBar = document.getElementById('hypeBar');
+        const hypeText = document.getElementById('hypeText');
+        const eqBars = document.querySelectorAll('.eq-bar');
+
+        const lionCharacter = document.getElementById('lionCharacter');
+        const dogCharacter = document.getElementById('dogCharacter');
+        const lionSpeech = document.getElementById('lionSpeech');
+        const dogSpeech = document.getElementById('dogSpeech');
+
+        let bpm = 120;
+        let isMusicPlaying = false;
+        let beatInterval = null;
+        let stepCount = 0;
+        let hypeScore = 75;
+        let currentOutfitIndex = 0; // 0: Shades, 1: Rainbow Afro, 2: Ballet Tutus, 3: Royal Crowns, 4: Natural
+
+        const discoColors = [
+            '#ff007f', '#00f3ff', '#ffe600', '#a855f7',
+            '#10b981', '#f97316', '#ec4899', '#3b82f6'
+        ];
+
+        const lionQuotes = [
+            "I'M THE KING OF FUNK! 🦁",
+            "MANE EVENT BABY! ✨",
+            "PUG LIFE CHOSE ME! 🔥",
+            "WATCH THE PAWS, BARNABY! 🕺",
+            "DISCO IN THE SAVANNAH! 🌴"
+        ];
+
+        const dogQuotes = [
+            "BORK BORK BOOGIE! 🐶",
+            "MY TAIL HAS ITS OWN ZIP CODE! 🌀",
+            "THROW SOME STEAKS & BONES! 🦴",
+            "WHO LET US OUT?! WOOF! 🐾",
+            "10/10 GOOD DISCO BOY! 🌟"
+        ];
+
+        /**************************************************************
+         * 2. BUILD 3D DISCO FLOOR TILES
+         **************************************************************/
+        const tileElements = [];
+        for (let i = 0; i < 40; i++) {
+            const tile = document.createElement('div');
+            tile.className = 'disco-tile';
+            discoFloor.appendChild(tile);
+            tileElements.push(tile);
+        }
+
+        function updateDiscoFloorAndVisualizer() {
+            tileElements.forEach((tile) => {
+                if (Math.random() > 0.42) {
+                    const color = discoColors[Math.floor(Math.random() * discoColors.length)];
+                    tile.style.backgroundColor = color;
+                    tile.style.boxShadow = `0 0 12px ${color}`;
+                } else {
+                    tile.style.backgroundColor = 'rgba(255, 255, 255, 0.06)';
+                    tile.style.boxShadow = 'none';
+                }
+            });
+
+            eqBars.forEach((bar) => {
+                const randomHeight = Math.floor(Math.random() * 32) + 8;
+                bar.style.height = `${randomHeight}px`;
+            });
+        }
+
+        /**************************************************************
+         * 3. WEB AUDIO API SYNTHESIZER & FUNNY SOUND EFFECTS
+         **************************************************************/
+        let audioCtx = null;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Synthesize Punchy Disco Kick Drum
+        function playKick() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(140, now);
+            osc.frequency.exponentialRampToValueAtTime(35, now + 0.12);
+
+            gain.gain.setValueAtTime(0.7, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        }
+
+        // Synthesize Crisp Hi-Hat
+        function playHiHat() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const bufferSize = audioCtx.sampleRate * 0.05;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.value = 6000;
+
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            noise.start(now);
+        }
+
+        // Synthesize Funky Disco Bass Note
+        const bassLineNotes = [110, 110, 130.81, 146.83, 164.81, 146.83, 130.81, 196.00];
+        function playFunkyBass(step) {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const filter = audioCtx.createBiquadFilter();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sawtooth';
+            const freq = bassLineNotes[step % bassLineNotes.length];
+            osc.frequency.setValueAtTime(freq, now);
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(900, now);
+            filter.frequency.exponentialRampToValueAtTime(220, now + 0.18);
+
+            gain.gain.setValueAtTime(0.28, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.2);
+        }
+
+        // Funny Dog Bark SFX
+        function playBarkSFX() {
+            initAudioContext();
+            const now = audioCtx.currentTime;
+
+            [0, 0.16].forEach((offset) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(320, now + offset);
+                osc.frequency.exponentialRampToValueAtTime(680, now + offset + 0.05);
+                osc.frequency.exponentialRampToValueAtTime(180, now + offset + 0.12);
+
+                gain.gain.setValueAtTime(0.5, now + offset);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + offset + 0.13);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + offset);
+                osc.stop(now + offset + 0.13);
+            });
+        }
+
+        // Funny Lion Roar SFX
+        function playRoarSFX() {
+            initAudioContext();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(160, now);
+            osc.frequency.linearRampToValueAtTime(210, now + 0.15);
+            osc.frequency.exponentialRampToValueAtTime(65, now + 0.55);
+
+            gain.gain.setValueAtTime(0.45, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.58);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.58);
+        }
+
+        // Classic DJ Airhorn SFX
+        function playAirhornSFX() {
+            initAudioContext();
+            const now = audioCtx.currentTime;
+            const freqs = [466.16, 587.33, 698.46]; // Detuned horn chord
+            freqs.forEach((f) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(f * 0.92, now);
+                osc.frequency.exponentialRampToValueAtTime(f, now + 0.06);
+
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.45);
+            });
+        }
+
+        /**************************************************************
+         * 4. BEAT LOOP & TEMPO MANAGEMENT
+         **************************************************************/
+        function startBeatLoop() {
+            if (beatInterval) clearInterval(beatInterval);
+            // Half-beat step interval for 8th notes
+            const stepMs = (60 / bpm) * 500;
+
+            beatInterval = setInterval(() => {
+                updateDiscoFloorAndVisualizer();
+                if (isMusicPlaying) {
+                    if (stepCount % 2 === 0) {
+                        playKick();
+                    } else {
+                        playHiHat();
+                    }
+                    playFunkyBass(stepCount);
+                }
+                stepCount++;
+            }, stepMs);
+        }
+
+        function updateTempo(newBpm) {
+            bpm = parseInt(newBpm, 10);
+            bpmDisplay.textContent = `${bpm} BPM`;
+            const beatSeconds = (60 / bpm).toFixed(2);
+            document.documentElement.style.setProperty('--beat-speed', `${beatSeconds}s`);
+            startBeatLoop();
+        }
+
+        bpmSlider.addEventListener('input', (e) => {
+            updateTempo(e.target.value);
+            boostHype(2);
+        });
+
+        musicToggleBtn.addEventListener('click', () => {
+            initAudioContext();
+            isMusicPlaying = !isMusicPlaying;
+            if (isMusicPlaying) {
+                musicIcon.className = 'fa-solid fa-pause';
+                musicBtnText.textContent = 'PAUSE DISCO BEAT';
+                musicToggleBtn.classList.remove('from-emerald-500', 'to-teal-500');
+                musicToggleBtn.classList.add('from-pink-500', 'to-yellow-400');
+                spawnFloatingEmojis(['🎵', '🎶', '🪩', '✨'], 6);
+                boostHype(10);
+            } else {
+                musicIcon.className = 'fa-solid fa-play';
+                musicBtnText.textContent = 'START DISCO BEAT';
+                musicToggleBtn.classList.add('from-emerald-500', 'to-teal-500');
+                musicToggleBtn.classList.remove('from-pink-500', 'to-yellow-400');
+            }
+        });
+
+        /**************************************************************
+         * 5. DANCE MOVE SELECTOR
+         **************************************************************/
+        const danceButtons = document.querySelectorAll('.dance-btn');
+        const allMoveClasses = [
+            'move-disco', 'move-floss', 'move-breakdance',
+            'move-robot', 'move-tornado', 'move-ballet'
+        ];
+
+        danceButtons.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                // Highlight active button
+                danceButtons.forEach((b) => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Apply dance class to arena
+                const selectedMove = btn.getAttribute('data-move');
+                const moveLabel = btn.getAttribute('data-label');
+                dancersArena.classList.remove(...allMoveClasses);
+                dancersArena.classList.add(selectedMove);
+
+                currentMoveLabel.textContent = moveLabel;
+                spawnFloatingEmojis(['🔥', '🕺', '💃', '⭐'], 5);
+                boostHype(8);
+
+                // Trigger cheerful sound or speech bubble
+                if (Math.random() > 0.5) {
+                    triggerSpeechBubble(lionSpeech, lionQuotes);
+                } else {
+                    triggerSpeechBubble(dogSpeech, dogQuotes);
+                }
+            });
+        });
+
+        /**************************************************************
+         * 6. INTERACTIVE CHARACTERS, PROPS & FLOATING PARTICLES
+         **************************************************************/
+        function triggerSpeechBubble(bubbleEl, quotesArray) {
+            const quote = quotesArray[Math.floor(Math.random() * quotesArray.length)];
+            bubbleEl.textContent = quote;
+            bubbleEl.classList.add('show');
+            clearTimeout(bubbleEl.hideTimer);
+            bubbleEl.hideTimer = setTimeout(() => {
+                bubbleEl.classList.remove('show');
+            }, 2200);
+        }
+
+        function spawnFloatingEmojis(emojiList, count = 8) {
+            for (let i = 0; i < count; i++) {
+                const span = document.createElement('span');
+                span.className = 'floating-particle text-2xl sm:text-3xl';
+                span.textContent = emojiList[Math.floor(Math.random() * emojiList.length)];
+                span.style.left = `${15 + Math.random() * 70}%`;
+                span.style.bottom = `${20 + Math.random() * 35}%`;
+                stageContainer.appendChild(span);
+                setTimeout(() => span.remove(), 1800);
+            }
+        }
+
+        function boostHype(amount) {
+            hypeScore = Math.min(100, hypeScore + amount);
+            hypeBar.style.width = `${hypeScore}%`;
+            if (hypeScore >= 100) {
+                hypeText.textContent = '100% MAXIMUM OVERDRIVE!! 🔥';
+                stageContainer.classList.add('party-overdrive');
+            } else {
+                hypeText.textContent = `${hypeScore}% BOOGIE`;
+            }
+        }
+
+        // Slowly decay hype over time to encourage interaction
+        setInterval(() => {
+            if (hypeScore > 40) {
+                hypeScore -= 1;
+                hypeBar.style.width = `${hypeScore}%`;
+                if (hypeScore < 100) {
+                    stageContainer.classList.remove('party-overdrive');
+                    hypeText.textContent = `${hypeScore}% BOOGIE`;
+                }
+            }
+        }, 2500);
+
+        // Clicking Lion
+        lionCharacter.addEventListener('click', () => {
+            playRoarSFX();
+            triggerSpeechBubble(lionSpeech, lionQuotes);
+            spawnFloatingEmojis(['🦁', '👑', '🥩', '🔥'], 6);
+            boostHype(6);
+        });
+
+        // Clicking Dog
+        dogCharacter.addEventListener('click', () => {
+            playBarkSFX();
+            triggerSpeechBubble(dogSpeech, dogQuotes);
+            spawnFloatingEmojis(['🐶', '🦴', '🐾', '💖'], 6);
+            boostHype(6);
+        });
+
+        // Soundboard Buttons
+        document.getElementById('sfxBarkBtn').addEventListener('click', () => {
+            playBarkSFX();
+            triggerSpeechBubble(dogSpeech, dogQuotes);
+            spawnFloatingEmojis(['🐶', '🐾', '🔊'], 5);
+            boostHype(5);
+        });
+
+        document.getElementById('sfxRoarBtn').addEventListener('click', () => {
+            playRoarSFX();
+            triggerSpeechBubble(lionSpeech, lionQuotes);
+            spawnFloatingEmojis(['🦁', '👑', '🔊'], 5);
+            boostHype(5);
+        });
+
+        document.getElementById('sfxHornBtn').addEventListener('click', () => {
+            playAirhornSFX();
+            spawnFloatingEmojis(['📢', '🎉', '🚨', '⚡'], 10);
+            boostHype(12);
+        });
+
+        // Costume / Outfit Swapper
+        document.getElementById('costumeBtn').addEventListener('click', () => {
+            currentOutfitIndex = (currentOutfitIndex + 1) % 5;
+            const shades = document.querySelectorAll('.prop-shades');
+            const afros = document.querySelectorAll('.prop-afro');
+            const tutus = document.querySelectorAll('.prop-tutu');
+            const crowns = document.querySelectorAll('.prop-crown');
+
+            // Hide all first
+            [...shades, ...afros, ...tutus, ...crowns].forEach(el => el.classList.add('hidden'));
+
+            if (currentOutfitIndex === 0) {
+                shades.forEach(el => el.classList.remove('hidden'));
+            } else if (currentOutfitIndex === 1) {
+                afros.forEach(el => el.classList.remove('hidden'));
+                shades.forEach(el => el.classList.remove('hidden'));
+            } else if (currentOutfitIndex === 2) {
+                tutus.forEach(el => el.classList.remove('hidden'));
+                crowns.forEach(el => el.classList.remove('hidden'));
+            } else if (currentOutfitIndex === 3) {
+                crowns.forEach(el => el.classList.remove('hidden'));
+                shades.forEach(el => el.classList.remove('hidden'));
+            }
+            // Index 4 is all natural!
+
+            spawnFloatingEmojis(['🕶️', '👑', '🩰', '✨'], 6);
+            boostHype(7);
+        });
+
+        // Treat Rain Button
+        document.getElementById('treatRainBtn').addEventListener('click', () => {
+            playBarkSFX();
+            setTimeout(playRoarSFX, 150);
+            triggerSpeechBubble(dogSpeech, ["OMG SKY TREATS!! 🦴🤩"]);
+            triggerSpeechBubble(lionSpeech, ["DIBS ON THE T-BONE! 🥩🦁"]);
+            spawnFloatingEmojis(['🦴', '🥩', '🍔', '🍕', '🌭', '🧀'], 16);
+            boostHype(15);
+        });
+
+        // Clicking Disco Ball toggles Party Overdrive
+        document.getElementById('discoBallBtn').addEventListener('click', () => {
+            stageContainer.classList.toggle('party-overdrive');
+            spawnFloatingEmojis(['🪩', '🌈', '✨', '💫'], 8);
+            boostHype(10);
+        });
+
+        // Initialize Floor & Beat Loop on Window Load
+        window.onload = function () {
+            updateTempo(120);
+            setTimeout(() => {
+                triggerSpeechBubble(dogSpeech, ["CLICK 'START DISCO BEAT'! 🐾"]);
+            }, 600);
+        };
+    </script>
+</body>
+</html>
